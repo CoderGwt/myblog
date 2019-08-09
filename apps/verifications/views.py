@@ -1,25 +1,27 @@
 import logging
 
+from django.http import JsonResponse
 from django_redis import get_redis_connection
 from django.views import View
-from django.shortcuts import render
 from django.http import HttpResponse
 
 from . import constants
 from utils.captcha.captcha import captcha
+from utils.json_fun import to_json_data
+from users.models import Users
 # Create your views here.
 
 # 导入日志器
 logger = logging.getLogger("blog")
 
 
+# 1. todo 创建一个公共类
 class ImageCode(View):
     """
     define image verification view
     /image_code/<uuid:image_code_id>/
     """
     # 步骤：
-    # 1. todo 创建一个公共类
     # 2. todo 从前端获取到参数并做验证
     def get(self, request, image_code_id):
         # 3. todo 生成验证码文本和验证码图片
@@ -35,3 +37,30 @@ class ImageCode(View):
 
         # 5. todo 把验证码图片返回给前端 [HttpResponse]
         return HttpResponse(content=image, content_type='image/jpg')  # 传输图片的时候，接收的是二进制，需要指定content_type为image/jpg 为图片类型
+
+
+# 1. 创建一个类
+class CheckUsernameView(View):
+    """
+    check username if exists
+    /username/(?P<username>\w{5,20})/
+    """
+    # 2. 校验参数
+    def get(self, request, username):
+        user = Users.objects.filter(username=username)
+        # 3. 查询数据
+        if not user:
+            data = {
+                "username": username,
+                'msg': "用户名可用",
+                'count': user.count()
+            }
+        else:
+            data = {
+                'username': username,
+                'msg': '用户名已注册，请重新输入',
+                'count': user.count()
+            }
+        # 4. 返回的结果
+        # return JsonResponse(data=data)
+        return to_json_data(data=data)
