@@ -20,7 +20,7 @@
 
 
       <div class="form-item">
-        <input type="text" placeholder="请输入用户名" name="username" class="form-control" autocomplete="off">
+        <input type="text" placeholder="请输入用户名" name="username" id="username" class="form-control" autocomplete="off">
       </div>
       <div class="form-item">
         <input type="password" placeholder="请输入密码" name="password" class="form-control">
@@ -52,4 +52,5 @@
 
 {% block script %}
   <script src="{% static 'js/base/auth.js' %}"></script>
+  <script src="{% static 'js/base/message.js' %}"></script>
 {% endblock %}
