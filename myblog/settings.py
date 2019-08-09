@@ -31,7 +31,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -80,7 +79,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'myblog.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
@@ -105,7 +103,6 @@ DATABASES = {
     }
 }
 
-
 # todo 配置redis
 CACHES = {
     'default': {
@@ -113,7 +110,16 @@ CACHES = {
         'LOCATION': 'redis://127.0.0.1:6379/0',
         'OPTIONS': {
             'CLIENT_CLASS': "django_redis.client.DefaultClient"
-        }
+        },
+    },
+
+    # todo 存储图片验证码文本信息
+    'verify_codes': {
+        "BACKEND": "django_redis.cache.RedisCache",
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': "django_redis.client.DefaultClient"
+        },
     }
 }
 
@@ -180,7 +186,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
@@ -193,7 +198,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = False  # 修改时间
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
