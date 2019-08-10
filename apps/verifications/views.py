@@ -64,3 +64,18 @@ class CheckUsernameView(View):
         # 4. 返回的结果
         # return JsonResponse(data=data)
         return to_json_data(data=data)
+
+
+# 1. 创建一个类
+class CheckMobileView(View):
+    """
+    check if mobile exists
+    /mobiles/(?P<mobile>1[3-9]\d{9})/
+    """
+    # 2. 检查参数 mobile
+    def get(self, request, mobile):
+        data = {
+            "mobile": mobile,
+            "count": Users.objects.filter(mobile=mobile).count()
+        }
+        return to_json_data(data=data)
