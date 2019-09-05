@@ -5,6 +5,7 @@ $(function () {
   let $mobile = $('#mobile');  // 选择id为mobile的网页元素，需要定义一个id为mobile
   let $smsCodeBtn = $('.form-item .sms-captcha');  // 获取短信验证码按钮元素，需要定义一个id为input_smscode
   let $imgCodeText = $('#input_captcha');  // 获取用户输入的图片验证码元素，需要定义一个id为input_captcha
+  let $register = $('.register-btn');  // 获取注册表单元素
 
   // 1、图像验证码逻辑
   generateImageCode();  // 生成图像验证码图片
@@ -13,7 +14,7 @@ $(function () {
 
   // 2、判断用户名是否注册
   $username.blur(function () {
-    fn_check_usrname();
+    fn_check_username();
   });
 
   // 3、判断用户手机号是否注册
@@ -98,6 +99,98 @@ $(function () {
 
   });
 
+  // 5. 注册逻辑
+  // 5、注册逻辑
+  $register.click(function (e) {
+    // 阻止默认提交操作
+    event.preventDefault();
+
+    // 获取用户输入的内容
+    let sUsername = $username.val();  // 获取用户输入的用户名字符串
+    let sPassword = $("input[name=password]").val();
+    let sPasswordRepeat = $("input[name=password_repeat]").val();
+    let sMobile = $mobile.val();  // 获取用户输入的手机号码字符串
+    // let sSmsCode = $("input[name=sms_code]").val();  // todo 为什么这个获取不到数据
+    let sSmsCode = $(".sms_code").val();
+
+    // 判断用户名是否已注册
+    if (fn_check_username() !== "success") {
+      return
+    }
+
+    // 判断手机号是否为空，是否已注册
+    if (fn_check_mobile() !== "success") {
+      return
+    }
+
+    // 判断用户输入的密码是否为空
+    if ((!sPassword) || (!sPasswordRepeat)) {
+      message.showError('密码或确认密码不能为空');
+      return
+    }
+
+    // 判断用户输入的密码和确认密码长度是否为6-20位
+    if ((sPassword.length < 6 || sPassword.length > 20) ||
+      (sPasswordRepeat.length < 6 || sPasswordRepeat.length > 20)) {
+      message.showError('密码和确认密码的长度需在6～20位以内');
+      return
+    }
+
+    // 判断用户输入的密码和确认密码是否一致
+    if (sPassword !== sPasswordRepeat) {
+      message.showError('密码和确认密码不一致');
+      return
+    }
+
+
+    // 判断用户输入的短信验证码是否为6位数字
+    if (!(/^\d{6}$/).test(sSmsCode)) {
+      message.showError('短信验证码格式不正确，必须为6位数字！');
+      return
+    }
+
+    // 发起注册请求
+    // 1、创建请求参数
+    let SdataParams = {
+      "username": sUsername,
+      "password": sPassword,
+      "password_repeat": sPasswordRepeat,
+      "mobile": sMobile,
+      "sms_code": sSmsCode
+    };
+
+    // 2、创建ajax请求
+    $.ajax({
+      // 请求地址
+      url: "/user/register/",  // url尾部需要添加/
+      // 请求方式
+      type: "POST",
+      data: JSON.stringify(SdataParams),
+      // 请求内容的数据类型（前端发给后端的格式）
+      contentType: "application/json; charset=utf-8",
+      // 响应数据的格式（后端返回给前端的格式）
+      dataType: "json",
+      async: false
+    })
+      .done(function (res) {
+        if (res.code === "0") {
+          // 注册成功
+          message.showSuccess('恭喜你，注册成功！');
+          setTimeout(function () {
+            // 注册成功之后重定向到主页
+            window.location.href = '/';
+          }, 1000)
+        } else {
+          // 注册失败，打印错误信息
+          message.showError(res.msg);
+        }
+      })
+      .fail(function(){
+        message.showError('服务器超时，请重试！');
+      });
+
+  });
+
 
   // 生成一个图片验证码的编号，并设置页面中图片验证码img标签的src属性
   function generateImageCode() {
@@ -125,8 +218,9 @@ $(function () {
   }
 
   // 判断用户名是否已经注册
-  function fn_check_usrname() {
+  function fn_check_username() {
     let sUsername = $username.val();  // 获取用户名字符串
+    let resultValue = "";
     if (sUsername === "") {
       message.showError('用户名不能为空！');
       return
@@ -142,17 +236,22 @@ $(function () {
       url: '/verifications/username/' + sUsername + '/',
       type: 'GET',
       dataType: 'json',
+      async: false  // 关掉异步，至关重要
     })
       .done(function (res) {
         if (res.data.count !== 0) {
-          message.showError(res.data.username + '已注册，请重新输入！')
+          message.showError(res.data.username + '已注册，请重新输入！');
+          resultValue = ""
         } else {
-          message.showInfo(res.data.username + '能正常使用！')
+          message.showInfo(res.data.username + '能正常使用！');
+          resultValue = 'success'
         }
       })
       .fail(function () {
         message.showError('服务器超时，请重试！');
+        resultValue = ""
       });
+    return resultValue
   }
 
   function fn_check_mobile() {
