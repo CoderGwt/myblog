@@ -12,3 +12,6 @@ SMS_CODE_TEMP_ID = 1
 
 # 短信验证码位数
 SMS_CODE_NUMS = 6
+
+# todo 云通讯短信验证码 有效期是以分钟计算
+SMS_CODE_YTX_EXPIRED = 5

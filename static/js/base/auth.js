@@ -178,7 +178,8 @@ $(function () {
           message.showSuccess('恭喜你，注册成功！');
           setTimeout(function () {
             // 注册成功之后重定向到主页
-            window.location.href = '/news/index/';
+            // window.location.href = '/news/index/';
+            window.location.href = document.referrer;  // 返回上一个页面
           }, 1000)
         } else {
           // 注册失败，打印错误信息

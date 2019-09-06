@@ -136,7 +136,7 @@ class SendSmsCodesView(View):
             # 发送短语验证码
             try:
                 result = CCP().send_template_sms(mobile,
-                                                 [sms_num, constants.SMS_CODE_REDIS_EXPIRES],
+                                                 [sms_num, constants.SMS_CODE_YTX_EXPIRED],
                                                  constants.SMS_CODE_TEMP_ID)
             except Exception as e:
                 logger.error("发送验证码短信[异常][ mobile: %s, message: %s ]" % (mobile, e))

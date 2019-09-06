@@ -44,6 +44,8 @@ class CheckImageCodeForm(forms.Form):
         img_key = "img_{}".format(image_uuid).encode("utf-8")
 
         real_image_code = con_redis.get(img_key)
+        # todo 取出来之后，需要做删除操作，不然5分钟内，可以反复无限次的操作验证码
+        con_redis.delete(img_key)
 
         # 2. 判断用户输入的验证码是否正确
         if not real_image_code or image_text.upper() != real_image_code.decode('utf8').upper():
