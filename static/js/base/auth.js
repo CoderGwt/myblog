@@ -111,7 +111,7 @@ $(function () {
     let sPasswordRepeat = $("input[name=password_repeat]").val();
     let sMobile = $mobile.val();  // 获取用户输入的手机号码字符串
     // let sSmsCode = $("input[name=sms_code]").val();  // todo 为什么这个获取不到数据
-    let sSmsCode = $(".sms_code").val();
+    let sSmsCode = $("input[name=sms_captcha]").val();
 
     // 判断用户名是否已注册
     if (fn_check_username() !== "success") {
@@ -178,7 +178,7 @@ $(function () {
           message.showSuccess('恭喜你，注册成功！');
           setTimeout(function () {
             // 注册成功之后重定向到主页
-            window.location.href = '/';
+            window.location.href = '/news/index/';
           }, 1000)
         } else {
           // 注册失败，打印错误信息

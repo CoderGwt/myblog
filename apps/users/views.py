@@ -39,8 +39,8 @@ class RegisterView(View):
             password = data.get('password')
             mobile = data.get('mobile')
 
-            # 6. 将用户信息保存到数据库
-            user = Users.objects.create(username=username, password=password, mobile=mobile)
+            # 6. 将用户信息保存到数据库  记得是create_user, 而不是 create
+            user = Users.objects.create_user(username=username, password=password, mobile=mobile)
             # 登录，保存session等信息
             login(request, user)
 
