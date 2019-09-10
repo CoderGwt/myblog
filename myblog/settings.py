@@ -120,8 +120,20 @@ CACHES = {
         'OPTIONS': {
             'CLIENT_CLASS': "django_redis.client.DefaultClient"
         },
+    },
+    'session': {
+        "BACKEND": "django_redis.cache.RedisCache",
+        'LOCATION': 'redis://127.0.0.1:6379/2',
+        'OPTIONS': {
+            'CLIENT_CLASS': "django_redis.client.DefaultClient"
+        },
     }
 }
+
+# todo 将用户的session保存到redis中
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+# todo 指定缓存redis的别名
+SESSION_CACHE_ALIAS = "session"
 
 # 在setting.py文件中加入如下配置：
 # todo 配置日志器，记录网站的日志信息

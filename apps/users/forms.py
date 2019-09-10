@@ -5,10 +5,13 @@
 import re
 
 from django import forms
+from django.db.models import Q
 from django_redis import get_redis_connection
+from django.contrib.auth import login
 
 from verifications.constants import SMS_CODE_NUMS
 from users.models import Users
+from . import constants
 
 
 class RegisterForm(forms.Form):
@@ -101,3 +104,59 @@ class RegisterForm(forms.Form):
 
         if not real_sms_code or sms_code != real_sms_code.decode("utf-8"):
             raise forms.ValidationError("短信验证码输入错误，请重新输入")
+
+
+class LoginForm(forms.Form):
+    user_account = forms.CharField(label="用户账号-手机/用户名")
+    password = forms.CharField(
+        label="密码", min_length=6, max_length=20,
+        error_messages={
+            'required': "密码不能为空 form",
+            'min_length': '密码长度须大于6位',
+            'max_length': "密码长度须小于20位"
+        }
+    )
+    remember_me = forms.BooleanField(required=False)
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        # todo 需要super()调用父类的init
+        # todo 上面使用get获取request对象的时候，这一步会报错。使用pop就不会，咋回事？？？
+        super(LoginForm, self).__init__(*args, **kwargs)
+
+    def clean_user_account(self):
+        user_info = self.cleaned_data.get("user_account")
+
+        if not re.match("^1[3-9]\d{9}$", user_info) and (len(user_info) < 5 or len(user_info) > 20):
+            raise forms.ValidationError("用户账号格式有误")
+
+        return user_info
+
+    def clean(self):
+        clean_data = super().clean()
+        # 获取参数
+        user_info = clean_data.get('user_account')
+        password = clean_data.get("password")
+        remember = clean_data.get("remember_me")
+
+        # 查询数据库，是否存在手机号或用户名为user_info的，使用Q变量 和 |
+        user_query = Users.objects.filter(Q(mobile=user_info) | Q(username=user_info))
+        if user_query:
+            user = user_query.first()
+            # 验证用户密码是否正确
+            if user.check_password(password):
+                # 判断是否有记住会话功能，记住5天
+                if remember:
+                    self.request.session.set_expiry(constants.USER_SESSION_EXPIRED)
+                else:
+                    # 没有记住，浏览器关闭即过时
+                    self.request.session.set_expiry(0)
+
+                # todo 登录
+                login(request=self.request, user=user)
+            else:
+                raise forms.ValidationError("密码输入错误，请重新输入！")
+        else:
+            raise forms.ValidationError("用户不存在，请重新输入 raise")
+
+
