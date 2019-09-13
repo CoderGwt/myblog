@@ -6,7 +6,7 @@ from django.shortcuts import render
 from django.core.paginator import Paginator, EmptyPage
 
 from . import constants
-from .models import Tag, News
+from .models import Tag, News, Banner
 from utils.json_fun import to_json_data
 from utils.res_code import Code, error_map
 
@@ -65,6 +65,29 @@ class NewsView(View):
         data = {
             'news': news_info_list,
             'total_pages': paginator.num_pages
+        }
+        return to_json_data(data=data)
+
+
+class BannerView(View):
+    """
+    create get banner view
+    /news/banners/
+    """
+    def get(self, request):
+        banners = Banner.objects.select_related('news').only('image_url', 'news_id', 'news__title')\
+            .filter(is_delete=False)[:constants.SHOW_BANNER_COUNT]  # 只取出六条
+        banner_list = []
+        for banner in banners:
+            banner_list.append({
+                'image_url': banner.image_url,
+                'title': banner.news.title,
+                'news_id': banner.news_id
+            })
+
+        # 返回数据给前端
+        data = {
+            'banners': banner_list
         }
         return to_json_data(data=data)
 

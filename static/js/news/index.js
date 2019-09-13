@@ -59,56 +59,56 @@ $(function () {
     }
   });
 
-  // // 新闻轮播图功能
-  // fn_load_banner();
-  // /*=== bannerStart ===*/
-  // let $banner = $('.banner');
-  // let $picLi = $(".banner .pic li");
-  // let $prev = $('.banner .prev');
-  // let $next = $('.banner .next');
-  // let $tabLi = $('.banner .tab li');
-  // let index = 0;
-  //
-  // // 小原点
-  // $tabLi.click(function () {
-  //   index = $(this).index();
-  //   $(this).addClass('active').siblings('li').removeClass('active');
-  //   $picLi.eq(index).fadeIn(1500).siblings('li').fadeOut(1500);
-  // });
-  // // 点击切换上一张
-  // $prev.click(function () {
-  //   index--;
-  //   if (index < 0) {
-  //     index = $tabLi.length - 1
-  //   }
-  //   $tabLi.eq(index).addClass('active').siblings('li').removeClass('active');
-  //   $picLi.eq(index).fadeIn(1500).siblings('li').fadeOut(1500);
-  // }).mousedown(function () {
-  //   return false
-  // });
-  //
-  // $next.click(function () {
-  //   auto();
-  // }).mousedown(function () {
-  //   return false
-  // });
-  // //  图片向前滑动
-  // function auto() {
-  //   index++;
-  //   index %= $tabLi.length;
-  //   $tabLi.eq(index).addClass('active').siblings('li').removeClass('active');
-  //   $picLi.eq(index).fadeIn(3000).siblings('li').fadeOut(3000);
-  // }
-  //
-  // // 定时器
-  // let timer = setInterval(auto, 2000);
-  // $banner.hover(function () {
-  //   clearInterval(timer)
-  // }, function () {
-  //   auto();
-  // });
-  //
-  // /*=== bannerEnd ===*/
+  // 新闻轮播图功能
+  fn_load_banner();
+  /*=== bannerStart ===*/
+  let $banner = $('.banner');
+  let $picLi = $(".banner .pic li");
+  let $prev = $('.banner .prev');
+  let $next = $('.banner .next');
+  let $tabLi = $('.banner .tab li');
+  let index = 0;
+
+  // 小原点
+  $tabLi.click(function () {
+    index = $(this).index();
+    $(this).addClass('active').siblings('li').removeClass('active');
+    $picLi.eq(index).fadeIn(1500).siblings('li').fadeOut(1500);
+  });
+  // 点击切换上一张
+  $prev.click(function () {
+    index--;
+    if (index < 0) {
+      index = $tabLi.length - 1
+    }
+    $tabLi.eq(index).addClass('active').siblings('li').removeClass('active');
+    $picLi.eq(index).fadeIn(1500).siblings('li').fadeOut(1500);
+  }).mousedown(function () {
+    return false
+  });
+
+  $next.click(function () {
+    auto();
+  }).mousedown(function () {
+    return false
+  });
+  //  图片向前滑动
+  function auto() {
+    index++;
+    index %= $tabLi.length;
+    $tabLi.eq(index).addClass('active').siblings('li').removeClass('active');
+    $picLi.eq(index).fadeIn(3000).siblings('li').fadeOut(3000);
+  }
+
+  // 定时器
+  let timer = setInterval(auto, 2000);
+  $banner.hover(function () {
+    clearInterval(timer)
+  }, function () {
+    auto();
+  });
+
+  /*=== bannerEnd ===*/
 
 
   // 定义向后端获取新闻列表数据的请求
