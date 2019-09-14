@@ -1,12 +1,12 @@
 import logging
 
 from django.views import View
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404, HttpResponseNotFound
 from django.shortcuts import render
 from django.core.paginator import Paginator, EmptyPage
 
 from . import constants
-from .models import Tag, News, Banner
+from .models import Tag, News, Banner, HotNews
 from utils.json_fun import to_json_data
 from utils.res_code import Code, error_map
 
@@ -18,6 +18,9 @@ class IndexView(View):
     def get(self, request):
         # todo 使用only进行select查询你，优化查询效率
         tags = Tag.objects.only('id', 'name').filter(is_delete=False).all()
+        hot_news = HotNews.objects.select_related('news') \
+            .only('news__title', 'news__image_url', 'news_id').filter(is_delete=False) \
+            .order_by('priority', '-news__clicks', '-update_time')[:constants.SHOW_HOT_NEWS_COUNT]
         return render(request, 'news/index.html', locals())
 
 
@@ -53,6 +56,7 @@ class NewsView(View):
         news_info_list = []
         for item in news_info:
             news_info_list.append({
+                'id': item.id,
                 'title': item.title,
                 'digest': item.digest,
                 'image_url': item.image_url,
@@ -67,6 +71,21 @@ class NewsView(View):
             'total_pages': paginator.num_pages
         }
         return to_json_data(data=data)
+
+
+class NewsDetailView(View):
+    """
+    news detail view
+    /news/<int:news_id>
+    """
+    def get(self, request, news_id):
+        new = News.objects.select_related('author', 'tag').\
+            only('tag__name', 'author__username', 'title', 'content', 'update_time').\
+            filter(is_delete=False, id=news_id).first()
+        if not new:
+            raise Http404("<新闻{}>不存在".format(news_id))
+            # return HttpResponseNotFound("<h1>NOT FOUND</h1>")  # 返回404， NOT FOUND
+        return render(request, 'news/news_detail.html', locals())
 
 
 class BannerView(View):

@@ -56,11 +56,20 @@ class Comment(ModelBase):
 
 class HotNews(ModelBase):
     """热门新闻"""
+    PRI_CHOICES = [
+        (1, '第一级'),
+        (2, '第二级'),
+        (3, '第三级'),
+        (4, '第四级'),
+        (5, '第五级'),
+        (6, '第六级'),
+    ]
+
     news = models.OneToOneField('News', on_delete=models.CASCADE)
-    priority = models.IntegerField(verbose_name="优先级", help_text="优先级")
+    priority = models.IntegerField(choices=PRI_CHOICES, default=3, verbose_name="优先级", help_text="优先级")
 
     class Meta:
-        ordering = ['-update_time', '-id']
+        ordering = ['priority', '-update_time', '-id']
         db_table = 'tb_hotnews'
         verbose_name = '热门新闻'
         verbose_name_plural = verbose_name
