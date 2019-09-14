@@ -1,4 +1,5 @@
 import logging
+import json
 
 from django.views import View
 from django.http import HttpResponse, Http404, HttpResponseNotFound
@@ -6,7 +7,7 @@ from django.shortcuts import render
 from django.core.paginator import Paginator, EmptyPage
 
 from . import constants
-from .models import Tag, News, Banner, HotNews
+from .models import Tag, News, Banner, HotNews, Comment
 from utils.json_fun import to_json_data
 from utils.res_code import Code, error_map
 
@@ -85,6 +86,16 @@ class NewsDetailView(View):
         if not new:
             raise Http404("<新闻{}>不存在".format(news_id))
             # return HttpResponseNotFound("<h1>NOT FOUND</h1>")  # 返回404， NOT FOUND
+
+        comments_list = []
+        comments = Comment.objects.select_related('author', 'parent').\
+            only('content', 'author__username', 'update_time',
+                 'parent__author__username', 'parent__content', 'parent__update_time').\
+            filter(is_delete=False, news_id=news_id)
+
+        for comment in comments:
+            comments_list.append(comment.to_json_data())
+
         return render(request, 'news/news_detail.html', locals())
 
 
@@ -109,6 +120,50 @@ class BannerView(View):
             'banners': banner_list
         }
         return to_json_data(data=data)
+
+
+class NewsCommentView(View):
+    """
+    create news comment
+    /news/<int:news_id>/comments/
+    """
+    def post(self, request, news_id):
+        # 判断用户是否登录 使用 request.user.is_authenticated
+        if not request.user.is_authenticated:
+
+            return to_json_data(code=Code.SESSIONERR, msg=error_map[Code.SESSIONERR])
+
+        try:
+            json_data = request.body
+            if not json_data:
+                return to_json_data(code=Code.PARAMERR, msg="参数为空，请重新输入")
+            dict_data = json.loads(json_data.decode("utf-8"))
+        except (Exception, ) as e:
+            return to_json_data(code=Code.UNKOWNERR, msg=error_map[Code.UNKOWNERR])
+
+        content = dict_data.get('content')
+        if not content:
+            return to_json_data(code=Code.PARAMERR, msg='评论内容不能为空')
+        parent_id = dict_data.get("parent_id")
+
+        if parent_id:
+            try:
+                parent_id = int(parent_id)
+
+                # 判断news_id 和 parent_id 数据是否存在
+                if not Comment.objects.only('id').filter(is_delete=False, id=parent_id, news_id=news_id).exists():
+                    return to_json_data(code=Code.PARAMERR, msg=error_map[Code.PARAMERR])
+            except (Exception, ) as e:
+                return to_json_data(code=Code.PARAMERR, msg="未知错误")
+        news_comment = Comment()
+        news_comment.news_id = news_id
+        news_comment.content = content
+        # 存在 或者 None 或者 “” 所以还是要判断
+        news_comment.parent_id = parent_id if parent_id else None
+        news_comment.author_id = request.user.id
+        news_comment.save()
+
+        return to_json_data(data=news_comment.to_json_data())
 
 
 class SearchView(View):

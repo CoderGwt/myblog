@@ -44,11 +44,25 @@ class Comment(ModelBase):
     author = models.ForeignKey('users.Users', on_delete=models.SET_NULL, null=True)
     news = models.ForeignKey('News', on_delete=models.CASCADE)
 
+    # todo 创建一个自关联的字段，多级评论的时候，父评论id，get
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+
     class Meta:
         ordering = ['-update_time', '-id']
         db_table = 'tb_comments'
         verbose_name = '评论'
         verbose_name_plural = verbose_name
+
+    def to_json_data(self):
+        return {
+            'id': self.id,
+            'news_id': self.news.id,
+            'content': self.content,
+            'comment_id': self.id,
+            'update_time': self.update_time.strftime("%Y年%m月%d日 %H:%M"),
+            'author': self.author.username,
+            'parent': self.parent.to_json_data() if self.parent else None,  # todo 父评论，get起来
+        }
 
     def __str__(self):
         return '<评论{}>'.format(self.id)

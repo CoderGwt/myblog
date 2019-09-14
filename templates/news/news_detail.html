@@ -9,56 +9,84 @@
 {% endblock %}
 
 {% block main-contain %}
-    <!-- news-contain start  -->
-    <div class="news-contain">
-      <h1 class="news-title">{{ new.title }}</h1>
-      <div class="news-info">
-        <div class="news-info-left">
-          <span class="news-author">{{ new.author.username }}</span>
-          <span class="news-pub-time">{{ new.update_time }}</span>
-          <span class="news-type">{{ new.tag.name }}</span>
-        </div>
+  <!-- news-contain start  -->
+  <div class="news-contain">
+    <h1 class="news-title">{{ new.title }}</h1>
+    <div class="news-info">
+      <div class="news-info-left">
+        <span class="news-author">{{ new.author.username }}</span>
+        <span class="news-pub-time">{{ new.update_time }}</span>
+        <span class="news-type">{{ new.tag.name }}</span>
       </div>
-      <article class="news-content" style="margin-top: 20px;">
-        {{ new.content | safe }}
-{#        文章内容#}
-      </article>
-      <div class="comment-contain">
-        <div class="comment-pub clearfix">
-          <div class="new-comment">
-            文章评论(<span class="comment-count">0</span>)
-          </div>
-          <div class="comment-control please-login-comment" style="display:none;">
-            <input type="text" placeholder="请登录后参加评论">
-          </div>
-          <div class="comment-control logged-comment">
-            <input type="text" placeholder="请填写评论">
-          </div>
-          <button class="comment-btn">发表评论</button>
+    </div>
+    <article class="news-content" style="margin-top: 20px;">
+      {{ new.content | safe }}
+      {#        文章内容#}
+    </article>
+    <div class="comment-contain">
+      <div class="comment-pub clearfix">
+        <div class="new-comment">
+          文章评论(<span class="comment-count">0</span>)
         </div>
-        <ul class="comment-list">
+        <div class="comment-control please-login-comment" style="display:none;">
+          <input type="text" placeholder="请登录后参加评论">
+        </div>
+        <div class="comment-control logged-comment">
+          <input type="text" placeholder="请填写评论">
+        </div>
+        <button class="comment-btn">发表评论</button>
+      </div>
+      <ul class="comment-list">
+        {% for comment in comments_list %}
           <li class="comment-item">
             <div class="comment-info clearfix">
               <img src="{% static 'images/avatar.jpeg' %}" alt="avatar" class="comment-avatar">
-              <span class="comment-user">评论人</span>
-              <span class="comment-pub-time">1小时前</span>
+              <span class="comment-user">{{ comment.author }}</span>
+              <span class="comment-pub-time">{{ comment.update_time }}</span>
             </div>
-            <div class="comment-content">这是一条评论</div>
+            <div class="comment-content">{{ comment.content }}</div>
+
+            {% if comment.parent %}
+              <div class="parent_comment_text">
+                <div class="parent_username">{{ comment.parent.author }}</div>
+                <br/>
+                <div class="parent_content_text">
+                  {{ comment.parent.content }}
+                </div>
+              </div>
+            {% endif %}
+
+            <div class="comment_time left_float">{{ comment.update_time }}</div>
+            <a href="javascript:void(0);" class="reply_a_tag right_float">回复</a>
+            <form class="reply_form left_float" comment-id="{{ comment.id }}"
+                  news-id="{{ comment.news_id }}">
+              <textarea class="reply_input"></textarea>
+              <input type="button" value="回复" class="reply_btn right_float">
+              <input type="reset" name="" value="取消" class="reply_cancel right_float">
+            </form>
+
           </li>
-          <li class="comment-item">
-            <div class="comment-info clearfix">
-              <img src="{% static 'images/avatar.jpeg' %}" alt="avatar" class="comment-avatar">
-              <span class="comment-user">评论人</span>
-              <span class="comment-pub-time">1小时前</span>
-            </div>
-            <div class="comment-content">这是一条评论</div>
-          </li>
-        </ul>
-      </div>
+
+        {% endfor %}
+
+        {#          <li class="comment-item">#}
+        {#            <div class="comment-info clearfix">#}
+        {#              <img src="{% static 'images/avatar.jpeg' %}" alt="avatar" class="comment-avatar">#}
+        {#              <span class="comment-user">评论人</span>#}
+        {#              <span class="comment-pub-time">1小时前</span>#}
+        {#            </div>#}
+        {#            <div class="comment-content">这是一条评论</div>#}
+        {#          </li>#}
+      </ul>
+    </div>
     <!-- news-contain end  -->
   </div>
 
-    {% block hot_comment %}
-    {% endblock %}
+  {% block hot_comment %}
+  {% endblock %}
 
+{% endblock %}
+
+{% block script %}
+  <script src="{% static 'js/news/news_detail.js' %}"></script>
 {% endblock %}
