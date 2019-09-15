@@ -3,7 +3,7 @@
 $(function () {
   // 未登录提示框
   let $loginComment = $('.please-login-comment input');
-  let $send_comment = $('.logged-comment .comment-btn');
+  let $send_comment = $('.comment-btn');
 
   $('.comment-list').delegate('a,input', 'click', function () {
 
@@ -124,6 +124,7 @@ $(function () {
 
   // 发表评论
   $send_comment.click(function () {
+    event.preventDefault();
     // 获取新闻id、评论id、评论内容
     let $this = $(this);
     let news_id = $this.parent().attr('news-id');
@@ -146,7 +147,7 @@ $(function () {
       dataType: "json",
     })
       .done(function (res) {
-        if (res.errno === "0") {
+        if (res.code === "0") {
           let one_comment = res.data;
           let html_comment = ``;
           html_comment += `

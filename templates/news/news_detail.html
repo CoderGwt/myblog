@@ -28,13 +28,18 @@
         <div class="new-comment">
           文章评论(<span class="comment-count">0</span>)
         </div>
-        <div class="comment-control please-login-comment" style="display:none;">
-          <input type="text" placeholder="请登录后参加评论">
-        </div>
-        <div class="comment-control logged-comment">
-          <input type="text" placeholder="请填写评论">
-        </div>
-        <button class="comment-btn">发表评论</button>
+        {% if user.is_authenticated %}
+          <div class="comment-control logged-comment" news-id="{{ new.id }}">
+            <input type="text" placeholder="请填写评论">
+            <button class="comment-btn">发表评论</button>
+          </div>
+        {% else %}
+          <div class="comment-control please-login-comment" news-id="{{ new.id }}">
+            <input type="text" placeholder="请登录后参加评论" readonly>
+            <button class="comment-btn">发表评论</button>
+          </div>
+        {% endif %}
+
       </div>
       <ul class="comment-list">
         {% for comment in comments_list %}
