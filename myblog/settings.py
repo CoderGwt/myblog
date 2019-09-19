@@ -221,3 +221,5 @@ STATICFILES_DIRS = [
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+SIZE_URL = ".....com"  # 在服务器上才需要用到这个，本地测试，需要的是本地的路径，不然找不到文件
