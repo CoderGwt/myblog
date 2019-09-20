@@ -1,7 +1,12 @@
+import datetime
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager as _UserManager
+from django.dispatch import receiver
+from django.db.models.signals import post_save  # 数据库模型save之后调用post_save()信号
 
-# Create your models here.
+
+from utils.models import ModelBase
 
 
 class UserManager(_UserManager):
@@ -33,3 +38,38 @@ class Users(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+class UserProfile(ModelBase):
+    """create user profile model"""
+    GENDER_CHOICES = [
+        ('M', "男"),
+        ('F', '女')
+    ]
+    user = models.OneToOneField(Users, on_delete=models.CASCADE, related_name='user_profile')
+    nickname = models.TextField(max_length=100, null=True, blank=True, verbose_name="昵称", help_text="昵称")
+    born_date = models.DateField(null=True, blank=True, verbose_name="出生日期", help_text="出生日期")
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default="M", verbose_name="性别", help_text="性别")
+    motto = models.TextField(max_length=1024, null=True, blank=True, verbose_name="座右铭", help_text="座右铭")
+
+    class Meta:
+        db_table = 'tb_user_profile'
+        verbose_name = "用户个人信息"
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.nickname
+
+
+@receiver(signal=post_save, sender=Users)
+def create_user_profile(sender, **kwargs):
+    """create user profile function"""
+    print(kwargs)
+    if kwargs.get("created", False):
+        user_profile = UserProfile.objects.get_or_create(user=kwargs.get('instance'))
+        if user_profile[-1]:
+            user_profile = user_profile[0]
+            user_profile.nickname = "信号机制"
+            user_profile.born_date = datetime.date(2019, 12, 2)
+            user_profile.motto = "django signal is easy to learn"
+            user_profile.save()
