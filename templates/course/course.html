@@ -1,0 +1,34 @@
+{% extends 'base/base.html' %}
+
+{% block title %}
+  课程
+{% endblock %}
+
+{% block link %}
+  <link rel="stylesheet" href="../../static/css/course/course.css">
+{% endblock %}
+
+{% block main %}
+  <main id="course-container">
+    <div class="w1200">
+      <ul class="course-list">
+
+        {% for course in courses %}
+          <li class="course-item">
+            <a href="{% url 'course:course_detail' course.id %}">
+              <img class="course-img" src="{{ course.teacher.avatar_url }}" alt="潭州英语">
+              <div class="course-content">
+                <p class="course-info">{{ course.category.name }}</p>
+                <p class="course-author">{{ course.teacher.name }}({{ course.teacher.positional_title }})</p>
+                <p class="course-price free">免费</p>
+              </div>
+            </a>
+          </li>
+        {% endfor %}
+
+
+
+      </ul>
+    </div>
+  </main>
+{% endblock %}
