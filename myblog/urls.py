@@ -19,10 +19,11 @@ from django.conf.urls.static import static
 from myblog import settings
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # path('admin/', admin.site.urls),
     path("news/", include('news.urls')),
     path("user/", include('users.urls')),
     path("course/", include('course.urls')),
     path("docs/", include('doc.urls')),
-    path("verifications/", include("verifications.urls"))
+    path("verifications/", include("verifications.urls")),
+    path("admin/", include("admin.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
