@@ -4,7 +4,7 @@ $(function () {
 
 
   // 添加标签
-  /*let $tagAdd = $("#btn-add-tag");  // 1. 获取添加按钮
+  let $tagAdd = $("#btn-add-tag");  // 1. 获取添加按钮
   $tagAdd.click(function () {   // 2. 点击事件
     fAlert.alertOneInput({
       title: "请输入文章标签",
@@ -40,7 +40,7 @@ $(function () {
                 window.location.reload();
               }, 1000)
             } else {
-              swal.showInputError(res.msg);
+              swal.showInputError(res.msg);  // TODO 错误显示在输入框下
             }
           })
           .fail(function () {
@@ -85,13 +85,13 @@ $(function () {
           dataType: "json",
         })
           .done(function (res) {
-            if (res.msg === "0") {
+            if (res.code === "0") {
               // 更新标签成功
               $(_this).parents('tr').find('td:nth-child(1)').text(inputVal);
               swal.close();
               message.showSuccess("标签修改成功");
             } else {
-              swal.showInputError(res.errmsg);
+              swal.showInputError(res.msg);
             }
           })
           .fail(function () {
@@ -100,7 +100,7 @@ $(function () {
 
       }
     });
-  });*/
+  });
 
 
   // 删除标签
