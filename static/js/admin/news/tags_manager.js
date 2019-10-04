@@ -87,9 +87,12 @@ $(function () {
           .done(function (res) {
             if (res.code === "0") {
               // 更新标签成功
-              $(_this).parents('tr').find('td:nth-child(1)').text(inputVal);
-              swal.close();
+              // $(_this).parents('tr').find('td:nth-child(1)').text(inputVal);
+              // swal.close();
               message.showSuccess("标签修改成功");
+              setTimeout(function () {
+                window.location.reload();
+              }, 1000)
             } else {
               swal.showInputError(res.msg);
             }

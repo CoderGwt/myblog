@@ -30,7 +30,14 @@ class IndexView(View):
         return render(request, 'admin/index/index.html')
 
 
+@method_decorator(my_dec, name='dispatch')
 class TagManageView(View):
+    # todo 对类/方法使用装饰器，可上方法，可下继承dispatch方法
+
+    # @method_decorator(my_dec)
+    # def dispatch(self, request, *args, **kwargs):
+    #     return super(TagManageView, self).dispatch(request, *args, **kwargs)
+
     def get(self, request):
         tags = Tag.objects.values('id', 'name').annotate(num_news=Count('news'))\
                     .filter(is_delete=False).order_by('-num_news', '-update_time')
@@ -39,7 +46,7 @@ class TagManageView(View):
     def post(self, request):
         json_data = request.body
         if not json_data:
-            return to_json_data(errno=Code.PARAMERR, errmsg=error_map[Code.PARAMERR])
+            return to_json_data(code=Code.PARAMERR, msg=error_map[Code.PARAMERR])
         # 将json转化为dict
         dict_data = json.loads(json_data.decode('utf8'))
         tag_name = dict_data.get('name')
@@ -55,10 +62,12 @@ class TagManageView(View):
         else:
             return to_json_data(code=Code.PARAMERR, msg="标签名为空")
 
+
+class TagEditView(View):
     def put(self, request, tag_id):
         json_data = request.body
         if not json_data:
-            return to_json_data(errno=Code.PARAMERR, errmsg=error_map[Code.PARAMERR])
+            return to_json_data(code=Code.PARAMERR, msg=error_map[Code.PARAMERR])
         # 将json转化为dict
         dict_data = json.loads(json_data.decode('utf8'))
         tag_name = dict_data.get('name')
