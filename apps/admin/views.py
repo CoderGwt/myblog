@@ -1,15 +1,23 @@
+import logging
 import json
+from datetime import datetime
+from urllib.parse import urlencode
 
 from django.views import View
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.db.models import Count
 from django.utils.decorators import method_decorator
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator, EmptyPage
 
-
-from news.models import Tag
+from news.models import Tag, News
 from utils.json_fun import to_json_data
 from utils.res_code import Code, error_map
+from utils.script import paginator_script
+from . import constants
+
+logger = logging.getLogger("django")
 
 
 def my_dec(func):
@@ -95,3 +103,93 @@ class TagEditView(View):
             return to_json_data(msg="标签更新成功")
         else:
             return to_json_data(code=Code.PARAMERR, msg="需要删除的标签不存在")
+
+
+class NewsManageView(View):
+    """create news manage
+    route: /admin/news/
+    """
+
+    def get(self, request):
+        """
+        获取文章列表信息
+        """
+        tags = Tag.objects.only('id', 'name').filter(is_delete=False)
+        newses = News.objects.only('id', 'title', 'author__username', 'tag__name', 'update_time'). \
+            select_related('author', 'tag').filter(is_delete=False)
+
+        # 通过时间进行过滤
+        try:
+            start_time = request.GET.get('start_time', '')
+            start_time = datetime.strptime(start_time, '%Y/%m/%d') if start_time else ''
+
+            end_time = request.GET.get('end_time', '')
+            end_time = datetime.strptime(end_time, '%Y/%m/%d') if end_time else ''
+        except Exception as e:
+            logger.info("用户输入的时间有误：\n{}".format(e))
+            start_time = end_time = ''
+
+        if start_time and not end_time:
+            newses = newses.filter(update_time__lte=start_time)
+        if end_time and not start_time:
+            newses = newses.filter(update_time__gte=end_time)
+
+        if start_time and end_time:
+            newses = newses.filter(update_time__range=(start_time, end_time))
+
+        # 通过title进行过滤
+        title = request.GET.get('title', '')
+        if title:
+            newses = newses.filter(title__icontains=title)
+
+        # 通过作者名进行过滤
+        author_name = request.GET.get('author_name', '')
+        if author_name:
+            newses = newses.filter(author__username__icontains=author_name)
+
+        # 通过标签id进行过滤
+        try:
+            tag_id = int(request.GET.get('tag_id', 0))
+        except Exception as e:
+            logger.info("标签错误：\n{}".format(e))
+            tag_id = 0
+        newses = newses.filter(is_delete=False, tag_id=tag_id) or \
+                 newses.filter(is_delete=False)
+
+        # 获取第几页内容
+        try:
+            page = int(request.GET.get('page', 1))
+        except Exception as e:
+            logger.info("当前页数错误：\n{}".format(e))
+            page = 1
+        paginator = Paginator(newses, constants.PER_PAGE_NEWS_COUNT)
+        try:
+            news_info = paginator.page(page)
+        except EmptyPage:
+            # 若用户访问的页数大于实际页数，则返回最后一页数据
+            logging.info("用户访问的页数大于总页数。")
+            news_info = paginator.page(paginator.num_pages)
+
+        paginator_data = paginator_script.get_paginator_data(paginator, news_info)
+
+        start_time = start_time.strftime('%Y/%m/%d') if start_time else ''
+        end_time = end_time.strftime('%Y/%m/%d') if end_time else ''
+        context = {
+            'news_info': news_info,
+            'tags': tags,
+            'paginator': paginator,
+            'start_time': start_time,
+            "end_time": end_time,
+            "title": title,
+            "author_name": author_name,
+            "tag_id": tag_id,
+            "other_param": urlencode({
+                "start_time": start_time,
+                "end_time": end_time,
+                "title": title,
+                "author_name": author_name,
+                "tag_id": tag_id,
+            })
+        }
+        context.update(paginator_data)
+        return render(request, 'admin/news/news_manage.html', context=context)
