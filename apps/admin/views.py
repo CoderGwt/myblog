@@ -215,3 +215,19 @@ class NewsEditView(View):
 
     def put(self, request):
         pass
+
+
+class NewsPubView(View):
+    """文章发布编辑view
+    /news/pub/
+    """
+    # permission_required = ('news.add_news', 'news.view_news')
+    # raise_exception = True
+
+    def get(self, request):
+        """
+        获取文章标签
+        """
+        tags = Tag.objects.only('id', 'name').filter(is_delete=False)
+
+        return render(request, 'admin/news/news_pub.html', locals())
