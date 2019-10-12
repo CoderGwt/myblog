@@ -16,7 +16,7 @@ $(function () {
     // 高亮今天
     todayHighlight: true,
     // 是否在周行的左侧显示周数
-    calendarWeeks: true,
+    // calendarWeeks: true,
     // 清除
     clearBtn: true,
     // 0 ~11  网站上线的时候
@@ -29,7 +29,7 @@ $(function () {
 
   // 删除标签
   let $newsDel = $(".btn-del");  // 1. 获取删除按钮
-  /*$newsDel.click(function () {   // 2. 点击触发事件
+  $newsDel.click(function () {   // 2. 点击触发事件
     let _this = this;
     let sNewsId = $(this).data('news-id');
     swal({
@@ -52,13 +52,13 @@ $(function () {
         dataType: "json",
       })
         .done(function (res) {
-          if (res.errno === "0") {
+          if (res.code === "0") {
             // 更新标签成功
             message.showSuccess("标签删除成功");
             $(_this).parents('tr').remove();
           } else {
             swal({
-              title: res.errmsg,
+              title: res.msg,
               type: "error",
               timer: 1000,
               showCancelButton: false,
@@ -71,7 +71,7 @@ $(function () {
         });
     });
 
-  });*/
+  });
 
 
   // get cookie using jQuery

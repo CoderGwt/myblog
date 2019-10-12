@@ -10,4 +10,5 @@ urlpatterns = [
     path('tags/<int:tag_id>/', views.TagEditView.as_view(), name='tags_manage'),
 
     path("news/", views.NewsManageView.as_view(), name='news_manage'),
+    path('news/<int:news_id>/', views.NewsEditView.as_view(), name='news_edit'),
 ]

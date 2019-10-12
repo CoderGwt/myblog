@@ -8,7 +8,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.db.models import Count
 from django.utils.decorators import method_decorator
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.paginator import Paginator, EmptyPage
 
 from news.models import Tag, News
@@ -193,3 +193,25 @@ class NewsManageView(View):
         }
         context.update(paginator_data)
         return render(request, 'admin/news/news_manage.html', context=context)
+
+
+class NewsEditView(View):
+    """
+    """
+    # permission_required = ('news.change_news', 'news.delete_news')
+    # raise_exception = True
+
+    def delete(self, request, news_id):
+        """
+        删除文章
+        """
+        news = News.objects.only('id').filter(id=news_id).first()
+        if news:
+            news.is_delete = True
+            news.save(update_fields=['is_delete'])
+            return to_json_data(msg="文章删除成功")
+        else:
+            return to_json_data(code=Code.PARAMERR, msg="需要删除的文章不存在")
+
+    def put(self, request):
+        pass
