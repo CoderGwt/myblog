@@ -15,7 +15,7 @@
     <div class="news-info">
       <div class="news-info-left">
         <span class="news-author">{{ new.author.username }}</span>
-        <span class="news-pub-time">{{ new.update_time }}</span>
+        <span class="news-pub-time">{{ new.update_time | date:"Y-m-d H:i:s" }}</span>
         <span class="news-type">{{ new.tag.name }}</span>
       </div>
     </div>

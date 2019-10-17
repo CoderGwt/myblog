@@ -2,10 +2,11 @@ import logging
 import json
 from datetime import datetime
 from urllib.parse import urlencode
+import qiniu
 
 from django.views import View
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import JsonResponse
 from django.db.models import Count
 from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
@@ -16,6 +17,8 @@ from utils.json_fun import to_json_data
 from utils.res_code import Code, error_map
 from utils.script import paginator_script
 from . import constants
+from utils.secrets import qiniu_secret_info
+from . import forms
 
 logger = logging.getLogger("django")
 
@@ -103,6 +106,20 @@ class TagEditView(View):
             return to_json_data(msg="标签更新成功")
         else:
             return to_json_data(code=Code.PARAMERR, msg="需要删除的标签不存在")
+
+
+class UploadToken(View):
+    """
+    """
+    def get(self, request):
+        access_key = qiniu_secret_info.QI_NIU_ACCESS_KEY
+        secret_key = qiniu_secret_info.QI_NIU_SECRET_KEY
+        bucket_name = qiniu_secret_info.QI_NIU_BUCKET_NAME
+        # 构建鉴权对象
+        q = qiniu.Auth(access_key, secret_key)
+        token = q.upload_token(bucket_name)
+
+        return JsonResponse({"uptoken": token})
 
 
 class NewsManageView(View):
@@ -231,3 +248,29 @@ class NewsPubView(View):
         tags = Tag.objects.only('id', 'name').filter(is_delete=False)
 
         return render(request, 'admin/news/news_pub.html', locals())
+
+    def post(self, request):
+        """
+        新增文章
+        """
+        json_data = request.body
+        if not json_data:
+            return to_json_data(errno=Code.PARAMERR, errmsg=error_map[Code.PARAMERR])
+        # 将json转化为dict
+        dict_data = json.loads(json_data.decode('utf8'))
+
+        form = forms.NewsPubForm(data=dict_data)
+        if form.is_valid():
+            news_instance = form.save(commit=False)
+            news_instance.author_id = request.user.id
+            # news_instance.author_id = 1     # for test
+            news_instance.save()
+            return to_json_data(errmsg='文章创建成功')
+        else:
+            # 定义一个错误信息列表
+            err_msg_list = []
+            for item in form.errors.get_json_data().values():
+                err_msg_list.append(item[0].get('message'))
+            err_msg_str = '/'.join(err_msg_list)  # 拼接错误信息为一个字符串
+
+            return to_json_data(errno=Code.PARAMERR, errmsg=err_msg_str)

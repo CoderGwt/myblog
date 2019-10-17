@@ -62,7 +62,7 @@ class NewsView(View):
                 'digest': item.digest,
                 'image_url': item.image_url,
                 'tag_name': item.tag.name,
-                'author': item.author.username,
+                'author': item.author.username if item.author else "",
                 'update_time': item.update_time.strftime("%Y年%m月%d日 %H:%M")  # 格式化时间
             })
 

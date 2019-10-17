@@ -13,4 +13,6 @@ urlpatterns = [
     path('news/<int:news_id>/', views.NewsEditView.as_view(), name='news_edit'),
 
     path('news/pub/', views.NewsPubView.as_view(), name='news_pub'),
+
+    path('token/', views.UploadToken.as_view(), name='upload_token'),
 ]

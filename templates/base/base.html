@@ -41,7 +41,8 @@
           <span>{{ user.username }}</span>
           <ul class="author-menu">
             {% if user.is_staff %}
-              <li><a href="javascript:void(0);">后台管理</a></li>
+              <li><a href="{% url 'admin:index' %}">后台管理</a></li>
+              <li><a href="{% url 'user:logout' %}">退出登录</a></li>
             {% else %}
               <li><a href="{% url 'user:logout' %}">退出登录</a></li>
             {% endif %}
